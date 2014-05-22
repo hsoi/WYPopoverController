@@ -111,9 +111,9 @@
     CGFloat rFloat, gFloat, bFloat, aFloat;
     [self getValueOfRed:&rFloat green:&gFloat blue:&bFloat alpha:&aFloat];
     
-    return [UIColor colorWithRed:MIN(rFloat + d, 1.0)
-                           green:MIN(gFloat + d, 1.0)
-                            blue:MIN(bFloat + d, 1.0)
+    return [UIColor colorWithRed:MIN(rFloat + d, 1.0f)
+                           green:MIN(gFloat + d, 1.0f)
+                            blue:MIN(bFloat + d, 1.0f)
                            alpha:1.0];
 }
 
@@ -122,9 +122,9 @@
     CGFloat rFloat, gFloat, bFloat, aFloat;
     [self getValueOfRed:&rFloat green:&gFloat blue:&bFloat alpha:&aFloat];
     
-    return [UIColor colorWithRed:MAX(rFloat - d, 0.0)
-                           green:MAX(gFloat - d, 0.0)
-                            blue:MAX(bFloat - d, 0.0)
+    return [UIColor colorWithRed:MAX(rFloat - d, 0.0f)
+                           green:MAX(gFloat - d, 0.0f)
+                            blue:MAX(bFloat - d, 0.0f)
                            alpha:1.0];
 }
 
@@ -382,8 +382,8 @@ static char const * const UINavigationControllerEmbedInPopoverTagKey = "UINaviga
     
     if (areaSize.width > 0 && areaSize.height > 0)
     {
-        float w1 = ceilf(areaSize.width / 10.0);
-        float h1 = ceilf(areaSize.height / 10.0);
+        float w1 = ceilf(areaSize.width / 10.0f);
+        float h1 = ceilf(areaSize.height / 10.0f);
         
         result = (w1 * h1);
     }
@@ -451,11 +451,11 @@ static char const * const UINavigationControllerEmbedInPopoverTagKey = "UINaviga
     
     WYPopoverTheme *result = [[WYPopoverTheme alloc] init];
     
-    result.tintColor = [UIColor colorWithRed:55./255. green:63./255. blue:71./255. alpha:1.0];
+    result.tintColor = [UIColor colorWithRed:55.f/255.f green:63.f/255.f blue:71.f/255.f alpha:1.0f];
     result.outerStrokeColor = nil;
     result.innerStrokeColor = nil;
     result.fillTopColor = result.tintColor;
-    result.fillBottomColor = [result.tintColor colorByDarken:0.4];
+    result.fillBottomColor = [result.tintColor colorByDarken:0.4f];
     result.glossShadowColor = nil;
     result.glossShadowOffset = CGSizeMake(0, 1.5);
     result.glossShadowBlurRadius = 0;
@@ -481,7 +481,7 @@ static char const * const UINavigationControllerEmbedInPopoverTagKey = "UINaviga
     
     WYPopoverTheme *result = [[WYPopoverTheme alloc] init];
     
-    result.tintColor = [UIColor colorWithRed:244./255. green:244./255. blue:244./255. alpha:1.0];
+    result.tintColor = [UIColor colorWithRed:244.f/255.f green:244.f/255.f blue:244.f/255.f alpha:1.0f];
     result.outerStrokeColor = [UIColor clearColor];
     result.innerStrokeColor = [UIColor clearColor];
     result.fillTopColor = nil;
@@ -502,7 +502,7 @@ static char const * const UINavigationControllerEmbedInPopoverTagKey = "UINaviga
     result.innerShadowOffset = CGSizeZero;
     result.innerCornerRadius = 0;
     result.viewContentInsets = UIEdgeInsetsZero;
-    result.overlayColor = [UIColor colorWithWhite:0 alpha:0.15];
+    result.overlayColor = [UIColor colorWithWhite:0.0f alpha:0.15f];
     
     return result;
 }
@@ -521,7 +521,12 @@ static char const * const UINavigationControllerEmbedInPopoverTagKey = "UINaviga
         }
     }
     
-    return result;
+    // FIXME: Hsoi 2014-05-22 - Why is innerCornerRadius declared as an NSInteger, but calculated as float?
+    // And then throughout the app code, it's used in floating-point ways. I think it's supposed to be
+    // a float (well, a CGFloat), but... not my call. reported: https://github.com/nicolaschengdev/WYPopoverController/issues/109
+    // For now, I'll just cast it to an NSUInteger to keep things moving along.
+    
+    return (NSUInteger)result;
 }
 
 - (CGSize)outerShadowOffset
@@ -540,7 +545,7 @@ static char const * const UINavigationControllerEmbedInPopoverTagKey = "UINaviga
     
     if (result == nil)
     {
-        result = [self.fillTopColor colorByDarken:0.6];
+        result = [self.fillTopColor colorByDarken:0.6f];
     }
     
     return result;
@@ -552,7 +557,7 @@ static char const * const UINavigationControllerEmbedInPopoverTagKey = "UINaviga
     
     if (result == nil)
     {
-        result = [self.fillTopColor colorByDarken:0.6];
+        result = [self.fillTopColor colorByDarken:0.6f];
     }
     
     return result;
@@ -564,7 +569,7 @@ static char const * const UINavigationControllerEmbedInPopoverTagKey = "UINaviga
     
     if (result == nil)
     {
-        result = [self.fillTopColor colorByLighten:0.2];
+        result = [self.fillTopColor colorByLighten:0.2f];
     }
     
     return result;
@@ -1047,7 +1052,7 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
         
         CGRect outerRect = [self outerRect];
         
-        float delta = self.arrowBase / 2. + .5;
+        float delta = self.arrowBase / 2.f + .5f;
         
         delta  += MIN(minOuterCornerRadius, outerCornerRadius);
         
@@ -1358,15 +1363,15 @@ static float edgeSizeFromCornerRadius(float cornerRadius) {
         
         CGContextSaveGState(context);
         {
-            float xOffset = glossShadowOffset.width + round(outerRectBorderRect.size.width);
-            float yOffset = glossShadowOffset.height;
+            CGFloat xOffset = glossShadowOffset.width + (CGFloat)round(outerRectBorderRect.size.width);
+            CGFloat yOffset = glossShadowOffset.height;
             CGContextSetShadowWithColor(context,
-                                        CGSizeMake(xOffset + copysign(0.1, xOffset), yOffset + copysign(0.1, yOffset)),
+                                        CGSizeMake(xOffset + (CGFloat)copysign(0.1f, xOffset), yOffset + (CGFloat)copysign(0.1f, yOffset)),
                                         glossShadowBlurRadius,
                                         self.glossShadowColor.CGColor);
             
             [outerRectPath addClip];
-            CGAffineTransform transform = CGAffineTransformMakeTranslation(-round(outerRectBorderRect.size.width), 0);
+            CGAffineTransform transform = CGAffineTransformMakeTranslation((CGFloat)-round(outerRectBorderRect.size.width), 0);
             [outerRectNegativePath applyTransform: transform];
             [[UIColor grayColor] setFill];
             [outerRectNegativePath fill];
@@ -1965,13 +1970,15 @@ static WYPopoverTheme *defaultTheme_ = nil;
             strongSelf->backgroundView.appearing = NO;
         }
         
+        id<WYPopoverControllerDelegate> strongDelegate = strongSelf->delegate;
+        
         if (completion)
         {
             completion();
         }
-        else if (strongSelf && strongSelf->delegate && [strongSelf->delegate respondsToSelector:@selector(popoverControllerDidPresentPopover:)])
+        else if (strongSelf && strongDelegate && [strongDelegate respondsToSelector:@selector(popoverControllerDidPresentPopover:)])
         {
-            [strongSelf->delegate popoverControllerDidPresentPopover:strongSelf];
+            [strongDelegate popoverControllerDidPresentPopover:strongSelf];
         }
         
         
@@ -1979,10 +1986,13 @@ static WYPopoverTheme *defaultTheme_ = nil;
     
     void (^adjustTintDimmed)() = ^() {
 #ifdef WY_BASE_SDK_7_ENABLED
-        if ([inView.window respondsToSelector:@selector(setTintAdjustmentMode:)]) {
-            for (UIView *subview in inView.window.subviews) {
-                if (subview != backgroundView) {
-                    [subview setTintAdjustmentMode:UIViewTintAdjustmentModeDimmed];
+        __typeof__(self) strongSelf = weakSelf;
+        if (strongSelf) {
+            if ([strongSelf->inView.window respondsToSelector:@selector(setTintAdjustmentMode:)]) {
+                for (UIView *subview in strongSelf->inView.window.subviews) {
+                    if (subview != strongSelf->backgroundView) {
+                        [subview setTintAdjustmentMode:UIViewTintAdjustmentModeDimmed];
+                    }
                 }
             }
         }
@@ -2096,7 +2106,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
                              completion:(void (^)(void))completion
 {
     barButtonItem = aItem;
-    UIView *itemView = [barButtonItem valueForKey:@"view"];
+    UIView *itemView = [aItem valueForKey:@"view"];
     aArrowDirections = WYPopoverArrowDirectionDown | WYPopoverArrowDirectionUp;
     [self presentPopoverFromRect:itemView.bounds
                           inView:itemView
@@ -2180,7 +2190,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
         }
     }
     
-    transform = CGAffineTransformScale(transform, 0.01, 0.01);
+    transform = CGAffineTransformScale(transform, 0.01f, 0.01f);
     
     return transform;
 }
@@ -2233,8 +2243,9 @@ static WYPopoverTheme *defaultTheme_ = nil;
     
     float keyboardHeight = UIInterfaceOrientationIsPortrait(orientation) ? keyboardRect.size.height : keyboardRect.size.width;
     
-    if (delegate && [delegate respondsToSelector:@selector(popoverControllerShouldIgnoreKeyboardBounds:)]) {
-        BOOL shouldIgnore = [delegate popoverControllerShouldIgnoreKeyboardBounds:self];
+    id<WYPopoverControllerDelegate> strongDelegate = self.delegate;
+    if (strongDelegate && [strongDelegate respondsToSelector:@selector(popoverControllerShouldIgnoreKeyboardBounds:)]) {
+        BOOL shouldIgnore = [strongDelegate popoverControllerShouldIgnoreKeyboardBounds:self];
         
         if (shouldIgnore) {
             keyboardHeight = 0;
@@ -2510,9 +2521,9 @@ static WYPopoverTheme *defaultTheme_ = nil;
                 yOffset -= minY - (containerFrame.origin.y - yOffset);
             }
             
-            if ([delegate respondsToSelector:@selector(popoverController:willTranslatePopoverWithYOffset:)])
+            if ([strongDelegate respondsToSelector:@selector(popoverController:willTranslatePopoverWithYOffset:)])
             {
-                [delegate popoverController:self willTranslatePopoverWithYOffset:&yOffset];
+                [strongDelegate popoverController:self willTranslatePopoverWithYOffset:&yOffset];
             }
             
             containerFrame.origin.y -= yOffset;
@@ -2584,13 +2595,15 @@ static WYPopoverTheme *defaultTheme_ = nil;
     
     __weak __typeof__(self) weakSelf = self;
     
-    
     void (^adjustTintAutomatic)() = ^() {
 #ifdef WY_BASE_SDK_7_ENABLED
-        if ([inView.window respondsToSelector:@selector(setTintAdjustmentMode:)]) {
-            for (UIView *subview in inView.window.subviews) {
-                if (subview != backgroundView) {
-                    [subview setTintAdjustmentMode:UIViewTintAdjustmentModeAutomatic];
+        __typeof__(self) strongSelf = weakSelf;
+        if (strongSelf) {
+            if ([strongSelf->inView.window respondsToSelector:@selector(setTintAdjustmentMode:)]) {
+                for (UIView *subview in strongSelf->inView.window.subviews) {
+                    if (subview != strongSelf->backgroundView) {
+                        [subview setTintAdjustmentMode:UIViewTintAdjustmentModeAutomatic];
+                    }
                 }
             }
         }
@@ -2615,13 +2628,14 @@ static WYPopoverTheme *defaultTheme_ = nil;
             }
         }
         
+        id<WYPopoverControllerDelegate> strongDelegate = strongSelf.delegate;
         if (completion)
         {
             completion();
         }
-        else if (callDelegate && strongSelf && strongSelf->delegate && [strongSelf->delegate respondsToSelector:@selector(popoverControllerDidDismissPopover:)])
+        else if (callDelegate && strongDelegate && [strongDelegate respondsToSelector:@selector(popoverControllerDidDismissPopover:)])
         {
-            [strongSelf->delegate popoverControllerDidDismissPopover:strongSelf];
+            [strongDelegate popoverControllerDidDismissPopover:strongSelf];
         }
     };
     
@@ -2720,10 +2734,10 @@ static WYPopoverTheme *defaultTheme_ = nil;
     //if (!isTouched)
     //{
         BOOL shouldDismiss = !viewController.modalInPopover;
-        
-        if (shouldDismiss && delegate && [delegate respondsToSelector:@selector(popoverControllerShouldDismissPopover:)])
+        id<WYPopoverControllerDelegate> strongDelegate = self.delegate;
+        if (shouldDismiss && strongDelegate && [strongDelegate respondsToSelector:@selector(popoverControllerShouldDismissPopover:)])
         {
-            shouldDismiss = [delegate popoverControllerShouldDismissPopover:self];
+            shouldDismiss = [strongDelegate popoverControllerShouldDismissPopover:self];
         }
         
         if (shouldDismiss)
@@ -2881,9 +2895,9 @@ static WYPopoverTheme *defaultTheme_ = nil;
     float minX, maxX, minY, maxY = 0;
     
     float keyboardHeight = UIInterfaceOrientationIsPortrait(orientation) ? keyboardRect.size.height : keyboardRect.size.width;
-    
-    if (delegate && [delegate respondsToSelector:@selector(popoverControllerShouldIgnoreKeyboardBounds:)]) {
-        BOOL shouldIgnore = [delegate popoverControllerShouldIgnoreKeyboardBounds:self];
+    id<WYPopoverControllerDelegate> strongDelegate = self.delegate;
+    if (strongDelegate && [strongDelegate respondsToSelector:@selector(popoverControllerShouldIgnoreKeyboardBounds:)]) {
+        BOOL shouldIgnore = [strongDelegate popoverControllerShouldIgnoreKeyboardBounds:self];
         
         if (shouldIgnore) {
             keyboardHeight = 0;
@@ -2936,6 +2950,7 @@ static WYPopoverTheme *defaultTheme_ = nil;
 
 #pragma mark Inline functions
 
+#if 0
 static NSString* WYStringFromOrientation(NSInteger orientation) {
     NSString *result = @"Unknown";
     
@@ -2958,6 +2973,7 @@ static NSString* WYStringFromOrientation(NSInteger orientation) {
     
     return result;
 }
+#endif
 
 static float WYStatusBarHeight() {
     UIInterfaceOrientation orienation = [[UIApplication sharedApplication] statusBarOrientation];
@@ -2976,20 +2992,20 @@ static float WYStatusBarHeight() {
     return statusBarHeight;
 }
 
-static float WYInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientation)
+static CGFloat WYInterfaceOrientationAngleOfOrientation(UIInterfaceOrientation orientation)
 {
-    float angle;
+    CGFloat angle;
     
     switch (orientation)
     {
         case UIInterfaceOrientationPortraitUpsideDown:
-            angle = M_PI;
+            angle = (CGFloat)M_PI;
             break;
         case UIInterfaceOrientationLandscapeLeft:
-            angle = -M_PI_2;
+            angle = (CGFloat)-M_PI_2;
             break;
         case UIInterfaceOrientationLandscapeRight:
-            angle = M_PI_2;
+            angle = (CGFloat)M_PI_2;
             break;
         default:
             angle = 0.0;
@@ -3084,17 +3100,19 @@ static CGPoint WYPointRelativeToOrientation(CGPoint origin, CGSize size, UIInter
         }
     }
     
-    if (barButtonItem)
+    UIBarButtonItem* strongBarButtonItem = barButtonItem;
+    id<WYPopoverControllerDelegate> strongDelegate = self.delegate;
+    if (strongBarButtonItem)
     {
-        inView = [barButtonItem valueForKey:@"view"];
+        inView = [strongBarButtonItem valueForKey:@"view"];
         rect = inView.bounds;
     }
-    else if ([delegate respondsToSelector:@selector(popoverController:willRepositionPopoverToRect:inView:)])
+    else if ([strongDelegate respondsToSelector:@selector(popoverController:willRepositionPopoverToRect:inView:)])
     {
         CGRect anotherRect;
         UIView *anotherInView;
         
-        [delegate popoverController:self willRepositionPopoverToRect:&anotherRect inView:&anotherInView];
+        [strongDelegate popoverController:self willRepositionPopoverToRect:&anotherRect inView:&anotherInView];
         
         if (&anotherRect != NULL)
         {
@@ -3120,9 +3138,10 @@ static CGPoint WYPointRelativeToOrientation(CGPoint origin, CGSize size, UIInter
     //WY_LOG(@"keyboardRect = %@", NSStringFromCGRect(keyboardRect));
     
     BOOL shouldIgnore = NO;
-    
-    if (delegate && [delegate respondsToSelector:@selector(popoverControllerShouldIgnoreKeyboardBounds:)]) {
-        shouldIgnore = [delegate popoverControllerShouldIgnoreKeyboardBounds:self];
+    id<WYPopoverControllerDelegate> strongDelegate = self.delegate;
+
+    if (strongDelegate && [strongDelegate respondsToSelector:@selector(popoverControllerShouldIgnoreKeyboardBounds:)]) {
+        shouldIgnore = [strongDelegate popoverControllerShouldIgnoreKeyboardBounds:self];
     }
     
     if (shouldIgnore == NO) {
@@ -3135,9 +3154,10 @@ static CGPoint WYPointRelativeToOrientation(CGPoint origin, CGSize size, UIInter
     keyboardRect = CGRectZero;
     
     BOOL shouldIgnore = NO;
-    
-    if (delegate && [delegate respondsToSelector:@selector(popoverControllerShouldIgnoreKeyboardBounds:)]) {
-        shouldIgnore = [delegate popoverControllerShouldIgnoreKeyboardBounds:self];
+    id<WYPopoverControllerDelegate> strongDelegate = self.delegate;
+
+    if (strongDelegate && [strongDelegate respondsToSelector:@selector(popoverControllerShouldIgnoreKeyboardBounds:)]) {
+        shouldIgnore = [strongDelegate popoverControllerShouldIgnoreKeyboardBounds:self];
     }
     
     if (shouldIgnore == NO) {
